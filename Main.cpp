@@ -39,7 +39,7 @@
 #define T_SAIDA    8   // objetivo final
 
 // Walkable definido por tipo (1=sim, 0=nao)
-// Tambem lido do arquivo de configuracao
+
 int walkable[9] = { 0, 1, 0, 1, 1, 1, 1, 0, 1 };
 
 // ============================================================
@@ -60,7 +60,7 @@ int mapa[LINHAS][COLUNAS] = {
     {0,1,1,1,1,1,1,7,1,1,1,7,1,1,1,1,1,0},
     {0,1,3,3,1,5,5,1,1,1,1,1,5,5,1,4,4,0},
     {0,1,3,1,1,5,1,1,1,1,1,1,1,5,1,4,1,0},
-    {0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,0},
+    {0,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,0},
     {0,1,6,6,1,1,1,1,2,8,2,1,1,1,6,6,1,0},
     {0,1,6,1,1,1,1,1,2,2,2,1,1,1,1,6,1,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -78,12 +78,12 @@ struct Item {
 Item itens[MAX_ITENS];
 int  num_itens = 0;
 
-// Moedas padrao (usadas se map.txt nao tiver secao ITEMS)
+// Moedas padrao
 void itensDefault() {
     num_itens = 0;
     int pos[][2] = {
-        {3,2},{8,2},{13,2},{3,12},{13,12},{9,15},
-        {2,5},{14,5},{5,13},{11,13}
+        {5,5},{2,9},{3,9},{5,3},{10,9},{2,8},
+        {10,7},{11,10},{13,5},{10,4}
     };
     for (int i = 0; i < 10; i++) {
         itens[i] = { pos[i][0], pos[i][1], 0, 1 };
@@ -100,7 +100,7 @@ int   jog_dir = 0;       // 0=E,1=SE,2=S,3=SW,4=W,5=NW,6=N,7=NE
 int   jog_vidas = 3;
 int   jog_moedas = 0;
 int   jog_invincivel = 0; // frames de invencibilidade apos dano
-float anim_pernas = 0;    // oscilacao das pernas (sprite animado)
+float anim_pernas = 0;    // oscilacao das pernas
 int   jog_andando = 0;
 
 // ============================================================
@@ -117,7 +117,7 @@ int  msg_timer = 180;
 float tempo = 0.0f;
 
 // ============================================================
-//  OpenGL infra (shaders + VAO/VBO)
+//  OpenGL
 // ============================================================
 GLuint shaderProgram;
 GLuint VAO, VBO;
@@ -308,7 +308,7 @@ static void tPilar(float lx, float ly) {
     quad(cx - 13, cy + 12, 26, 7, .33f, .33f, .54f);
 }
 static void tSaida(float lx, float ly) {
-    float p = .5f + .4f * sinf(tempo * 4.f);
+    float p = .5f + .6f * sinf(tempo * 6.f);
     isoTile(lx, ly, .10f, p * .9f, .10f, .04f, .30f, .04f);
     float cx = lx + TILE_W / 2.f, cy = ly + TILE_H / 2.f + 4;
     tri(cx, cy + 14, cx - 10, cy + 2, cx + 10, cy + 2, .8f, 1.f, .8f, .9f);
@@ -319,9 +319,7 @@ static void tSaida(float lx, float ly) {
 //  Sprite do jogador ANIMADO
 //  Partes: sombra, pernas (oscilam ao andar), corpo, cabeca,
 //          bracos (balancem), olhos (direcionais)
-//  Tecnica identica ao boneco do Modulo 5: partes geometricas
-//  que se movem em funcao de um angulo/fase de animacao
-// ============================================================
+
 static void desenhaJogador(float lx, float ly) {
     float cx = lx + TILE_W / 2.f;
     float cy = ly + TILE_H / 2.f + 8;
@@ -552,7 +550,7 @@ static void mover(int dirIdx) {
     jog_col = nc; jog_lin = nl;
     jog_andando = 1;
 
-    // Tile swap: ao pisar, chao vira areia (marca visual de que foi pisado)
+    // Tile swap: ao pisar, chao vira areia
     if (mapa[nl][nc] == T_CHAO)
         mapa[nl][nc] = T_AREIA;
 
@@ -617,7 +615,7 @@ static void reiniciar() {
         {0,1,1,1,1,1,1,7,1,1,1,7,1,1,1,1,1,0},
         {0,1,3,3,1,5,5,1,1,1,1,1,5,5,1,4,4,0},
         {0,1,3,1,1,5,1,1,1,1,1,1,1,5,1,4,1,0},
-        {0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,0},
+        {0,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,0},
         {0,1,6,6,1,1,1,1,2,8,2,1,1,1,6,6,1,0},
         {0,1,6,1,1,1,1,1,2,2,2,1,1,1,1,6,1,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -719,8 +717,8 @@ int main() {
     }
     printf("OpenGL: %s\n", glGetString(GL_VERSION));
 
-    carregarTileset("config/tileset.txt");
-    carregarMapa("config/map.txt");
+    carregarTileset("tileset.txt");
+    carregarMapa("map.txt");
 
     buildShaders();
     setupVAO();
@@ -730,8 +728,8 @@ int main() {
     glfwSetKeyCallback(win, keyCallback);
     glfwSetFramebufferSizeCallback(win, framebufferCB);
 
-    printf("\n=== CEMITERIO SOMBRIO ===\n");
-    printf("Objetivo: Colete %d moedas e chegue a SAIDA (verde)\n", num_itens);
+    printf("\n=== Trabalho Grau B ===\n");
+    printf("Objetivo: Colete 8 moedas e chegue a SAIDA (verde)\n", num_itens);
     printf("Cuidado: LAVA tira vidas!\n");
     printf("Controles:\n");
     printf("  Q=NW  W=N  E=NE\n");
